@@ -6,19 +6,23 @@ import { fileURLToPath } from "node:url";
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 export const MEETINGS_DIR = path.join(ROOT, "web", "content", "meetings");
 
-// Мини-парсер .env — чтобы не тащить зависимость ради одной задачи.
+// Источник секретов:
+//  - локально — файл .env (мини-парсер, чтобы не тащить зависимость);
+//  - в облаке (Routine) — переменные окружения среды, файла .env там нет.
+// process.env имеет приоритет над файлом.
 export function loadEnv() {
-  const file = path.join(ROOT, ".env");
-  if (!fs.existsSync(file)) return {};
   const env = {};
-  for (const line of fs.readFileSync(file, "utf8").split("\n")) {
-    const trimmed = line.trim();
-    if (!trimmed || trimmed.startsWith("#")) continue;
-    const eq = trimmed.indexOf("=");
-    if (eq === -1) continue;
-    env[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
+  const file = path.join(ROOT, ".env");
+  if (fs.existsSync(file)) {
+    for (const line of fs.readFileSync(file, "utf8").split("\n")) {
+      const trimmed = line.trim();
+      if (!trimmed || trimmed.startsWith("#")) continue;
+      const eq = trimmed.indexOf("=");
+      if (eq === -1) continue;
+      env[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
+    }
   }
-  return env;
+  return { ...env, ...process.env };
 }
 
 export function loadConfig() {

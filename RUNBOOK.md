@@ -23,24 +23,44 @@
 Из `transcript` собрать JSON строго по схеме (см. ниже). Тон — деловой, кратко,
 без воды. `id` = `<YYYY-MM-DD>-<HHMM>`.
 
-### 4. Записать файл встречи
-Сохранить JSON в `web/content/meetings/<id>.json`. Это и есть «история» —
+### 4. Записать файл встречи (с дедупликацией)
+Для каждой встречи `id` = `<YYYY-MM-DD>-<HHMM>`. **Если `web/content/meetings/<id>.json`
+уже существует — встреча обработана ранее, пропустить** (не дублировать деплой и Telegram).
+Иначе сохранить JSON в `web/content/meetings/<id>.json`. Это и есть «история» —
 накапливающиеся файлы, отдельная БД не нужна.
 
+Если новых встреч нет — на этом закончить (ничего не деплоить и не слать).
+
 ### 5. Деплой на Vercel
+Из чистого клона проект надо сперва слинковать с существующим Vercel-проектом
+(имя/scope — из `config.json`), иначе CLI создаст новый:
 ```bash
 cd web
+npx vercel@latest link   --yes --project <site.vercelProject> --scope <site.vercelScope> --token "$VERCEL_TOKEN"
 npx vercel@latest deploy --prod --yes --scope <site.vercelScope> --token "$VERCEL_TOKEN"
 ```
 Vercel сам собирает Next.js (`output: export`) в статику. Прод-ссылка стабильна
 (`site.baseUrl`).
 
-### 6. Пуш в Telegram
+### 6. Сохранить историю обратно в репозиторий
+Песочница Routine эфемерна — без push новый файл потеряется, а встреча на следующем
+прогоне обработается повторно. Поэтому закоммитить и запушить новые файлы:
+```bash
+git add web/content/meetings/
+git commit -m "встреча <id>"
+git push
+```
+
+### 7. Пуш в Telegram
 Для каждой новой встречи:
 ```bash
 node scripts/send-telegram.mjs <id>
 ```
 Шлёт краткое саммари + ссылку на страницу встречи.
+
+> **Секреты в облаке:** `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `VERCEL_TOKEN`
+> приходят как переменные окружения среды Routine (не из `.env`, которого в облаке нет).
+> Скрипты читают их через `loadEnv()` (process.env приоритетнее файла).
 
 ---
 
