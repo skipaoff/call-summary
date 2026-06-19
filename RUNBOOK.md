@@ -28,12 +28,14 @@
 ```
 Если встреч за сегодня нет — на этом закончить (ничего не собирать и не слать).
 
-### 4. Собрать страницу дня
+### 4. Собрать мини-сайт дня
 ```bash
-node scripts/build-day.mjs days/<YYYY-MM-DD>.json out/site/index.html
+node scripts/build-day.mjs days/<YYYY-MM-DD>.json out/site
 ```
-Получается один самодостаточный HTML (стиль брендбука инлайн) + `vercel.json`
-(framework=null → чистая статика, без сборки).
+Получается папка: `index.html` (сводка-список звонков) + `<time>/index.html` на
+каждый звонок (детально) + `vercel.json` (framework=null → чистая статика, без сборки).
+Стиль брендбука инлайнится в каждую страницу. Переходы относительные: `<url>/`,
+`<url>/<time>/`.
 
 ### 5. Деплой на Vercel
 ```bash
