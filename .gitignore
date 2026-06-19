@@ -1,0 +1,20 @@
+# secrets — НИКОГДА в git
+.env
+.env.local
+.env.*.local
+
+# vercel
+.vercel/
+
+# node / next
+node_modules/
+.next/
+out/
+dist/
+
+# системное
+*.log
+.DS_Store
+
+# локальные настройки Claude (личные, не для репозитория)
+.claude/settings.local.json

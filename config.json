@@ -1,0 +1,14 @@
+{
+  "source": {
+    "type": "notion",
+    "notionPageUrl": "https://app.notion.com/p/384474edfa1e8077961df8377aaf50ec",
+    "notionPageId": "384474edfa1e8077961df8377aaf50ec"
+  },
+  "site": {
+    "name": "Call Summary",
+    "locale": "ru",
+    "baseUrl": "https://call-summary-vert.vercel.app",
+    "vercelProject": "call-summary",
+    "vercelScope": "skipaoff"
+  }
+}
