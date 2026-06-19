@@ -21,7 +21,19 @@ export function loadEnv() {
       env[trimmed.slice(0, eq).trim()] = trimmed.slice(eq + 1).trim();
     }
   }
-  return { ...env, ...process.env };
+  const merged = { ...env, ...process.env };
+
+  // Плагин Claude Code экспортит userConfig как CLAUDE_PLUGIN_OPTION_<key>.
+  // Подхватываем их под привычные имена, если прямые не заданы.
+  const fromPlugin = {
+    TELEGRAM_BOT_TOKEN: "CLAUDE_PLUGIN_OPTION_telegram_bot_token",
+    TELEGRAM_CHAT_ID: "CLAUDE_PLUGIN_OPTION_telegram_chat_id",
+    VERCEL_TOKEN: "CLAUDE_PLUGIN_OPTION_vercel_token",
+  };
+  for (const [target, source] of Object.entries(fromPlugin)) {
+    if (!merged[target] && process.env[source]) merged[target] = process.env[source];
+  }
+  return merged;
 }
 
 export function loadConfig() {

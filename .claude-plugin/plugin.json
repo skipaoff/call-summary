@@ -1,0 +1,37 @@
+{
+  "name": "call-summary",
+  "version": "1.0.0",
+  "description": "Саммари созвонов из Notion → страница на Vercel + пуш в Telegram. Запуск по расписанию через Routines.",
+  "author": { "name": "skipaoff" },
+  "homepage": "https://github.com/skipaoff/call-summary",
+  "repository": "https://github.com/skipaoff/call-summary",
+  "mcpServers": "./.mcp.json",
+  "userConfig": {
+    "notion_page_url": {
+      "type": "string",
+      "title": "Notion: ссылка на страницу записей встреч",
+      "description": "Полный URL страницы, куда Notion AI складывает записи созвонов.",
+      "required": true
+    },
+    "telegram_bot_token": {
+      "type": "string",
+      "title": "Telegram bot token",
+      "description": "Токен бота от @BotFather.",
+      "sensitive": true,
+      "required": true
+    },
+    "telegram_chat_id": {
+      "type": "string",
+      "title": "Telegram chat_id",
+      "description": "Куда слать сводку (узнать: напиши боту, открой api.telegram.org/bot<token>/getUpdates).",
+      "required": true
+    },
+    "vercel_token": {
+      "type": "string",
+      "title": "Vercel token",
+      "description": "Vercel → Settings → Tokens → Create.",
+      "sensitive": true,
+      "required": true
+    }
+  }
+}

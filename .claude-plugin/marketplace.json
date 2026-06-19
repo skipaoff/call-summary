@@ -1,0 +1,11 @@
+{
+  "name": "call-summary",
+  "owner": { "name": "skipaoff" },
+  "plugins": [
+    {
+      "name": "call-summary",
+      "source": "./",
+      "description": "Саммари созвонов: Notion → Vercel-страница + Telegram, по расписанию через Routines."
+    }
+  ]
+}
