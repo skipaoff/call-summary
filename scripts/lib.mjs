@@ -4,7 +4,6 @@ import { fileURLToPath } from "node:url";
 
 // Корень проекта = на уровень выше scripts/. Без хардкода абсолютных путей.
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-export const MEETINGS_DIR = path.join(ROOT, "web", "content", "meetings");
 
 // Источник секретов:
 //  - локально — файл .env (мини-парсер, чтобы не тащить зависимость);
@@ -27,20 +26,4 @@ export function loadEnv() {
 
 export function loadConfig() {
   return JSON.parse(fs.readFileSync(path.join(ROOT, "config.json"), "utf8"));
-}
-
-export function loadMeeting(id) {
-  const file = path.join(MEETINGS_DIR, `${id}.json`);
-  if (!fs.existsSync(file)) throw new Error(`Встреча не найдена: ${file}`);
-  return JSON.parse(fs.readFileSync(file, "utf8"));
-}
-
-// Последняя по дате+времени встреча (когда id не передан).
-export function latestMeetingId() {
-  const files = fs
-    .readdirSync(MEETINGS_DIR)
-    .filter((f) => f.endsWith(".json"))
-    .sort();
-  if (files.length === 0) throw new Error("Нет ни одной встречи в " + MEETINGS_DIR);
-  return files[files.length - 1].replace(/\.json$/, "");
 }

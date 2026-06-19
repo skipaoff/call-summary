@@ -1,62 +1,59 @@
 # Call Summary
 
 Персональный пайплайн: берёт транскрипты созвонов из **Notion AI Meeting Notes**,
-делает кастомное саммари через Claude, публикует **HTML-страницу на Vercel** и шлёт
-краткое саммари + ссылку в **Telegram**. Запуск — по расписанию через Claude
-Routines, без своего бэкенда.
+делает кастомное саммари через Claude, публикует **одну HTML-страницу за день** на
+Vercel и шлёт краткую сводку + ссылку в **Telegram**. Запуск — по расписанию через
+Claude Routines, без своего бэкенда.
 
-Живой сайт: https://call-summary-vert.vercel.app
+«Последний день» всегда тут: https://call-summary-vert.vercel.app
 
-## Как это устроено
+## Идея архитектуры (просто)
 
 ```
-Notion (источник) → саммари (Claude) → web/content/meetings/<id>.json
+Notion (источник) → саммари (Claude) → days/<дата>.json
                                               ↓
-                              Vercel (статика)   Telegram (пуш)
+                          build-day.mjs → одна HTML-страница за день
+                                              ↓
+                              Vercel (статика)   Telegram (одна ссылка/день)
 ```
 
+- **Одна страница на день.** Все встречи дня — на одной странице, каждая детально.
+- **Архив без БД.** На деплое Vercel выдаёт неизменяемый публичный URL дня. Он уходит
+  в Telegram один раз и живёт вечно → **история ссылок в Telegram и есть архив.**
 - **Источник — сменный адаптер.** Notion это первая реализация; остальной пайплайн
-  работает с единым форматом встречи `{ date, title, participants, transcript }`.
-- **Без БД.** История — это накапливающиеся JSON-файлы в `web/content/meetings/`.
+  работает с единым форматом встречи.
 - **Без хардкода.** Параметры — в `config.json`, секреты — в `.env`.
 
 ## Структура
 
 | Путь | Назначение |
 |------|------------|
-| `config.json` | Несекретные параметры: Notion-страница, baseUrl, проект/scope Vercel |
+| `config.json` | Несекретные параметры: Notion-страница, проект/scope Vercel |
 | `.env` | Секреты (в git не попадает) — см. `.env.example` |
-| `RUNBOOK.md` | Пошаговый пайплайн для Routine (Notion → саммари → деплой → Telegram) |
-| `scripts/send-telegram.mjs` | Отправка саммари в Telegram |
-| `web/` | Next.js-приложение (статический экспорт), список встреч + страница встречи |
+| `RUNBOOK.md` | Пошаговый пайплайн (Notion → саммари → страница дня → деплой → Telegram) |
+| `scripts/build-day.mjs` | Рендер одной HTML-страницы за день (стиль брендбука, без сборки) |
+| `scripts/send-telegram.mjs` | Сводка за день + ссылка в Telegram |
+| `days/<дата>.json` | Данные дня: массив встреч (пример: `days/2026-06-19.json`) |
 
 ## Запуск
 
 ### Настройка
-1. `cp .env.example .env` и заполнить:
-   - `TELEGRAM_BOT_TOKEN` — токен бота от @BotFather
-   - `TELEGRAM_CHAT_ID` — id чата-получателя
-   - `VERCEL_TOKEN` — токен из Vercel → Settings → Tokens
-2. Указать свою Notion-страницу с записями в `config.json` → `source.notionPageUrl`.
+1. `cp .env.example .env` и заполнить `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`, `VERCEL_TOKEN`.
+2. Указать свою Notion-страницу в `config.json` → `source.notionPageUrl`.
 
-### Локальная разработка сайта
+### Локально (собрать + задеплоить + отправить)
 ```bash
-cd web
-npm install
-npm run dev      # http://localhost:3000
+node scripts/build-day.mjs days/2026-06-19.json out/site/index.html
+cd out/site && npx vercel@latest deploy --prod --yes --scope <scope> --token "$VERCEL_TOKEN"
+node scripts/send-telegram.mjs days/2026-06-19.json "<immutable-url>"
 ```
 
-### Прогон пайплайна
-Следовать `RUNBOOK.md` (вручную или из Routine). Деплой и пуш:
-```bash
-cd web && npx vercel@latest deploy --prod --yes --scope <scope> --token "$VERCEL_TOKEN"
-node scripts/send-telegram.mjs <meetingId>
-```
+Полный регламент прогона — в `RUNBOOK.md`.
 
 ## Переменные окружения
 
 | Переменная | Описание |
 |------------|----------|
 | `TELEGRAM_BOT_TOKEN` | Токен Telegram-бота |
-| `TELEGRAM_CHAT_ID` | Куда слать саммари |
+| `TELEGRAM_CHAT_ID` | Куда слать сводку |
 | `VERCEL_TOKEN` | Деплой на Vercel через CLI |

@@ -6,11 +6,12 @@
 # vercel
 .vercel/
 
-# node / next
+# node
 node_modules/
-.next/
-out/
 dist/
+
+# build-артефакт страницы дня
+out/
 
 # системное
 *.log
