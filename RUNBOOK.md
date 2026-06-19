@@ -49,6 +49,11 @@ npx vercel@latest deploy --prod --yes --scope <site.vercelScope> --token "$VERCE
 > неизменяемые URL требуют логина (см. шаг setup в визарде). Через API:
 > `PATCH https://api.vercel.com/v9/projects/<project>?teamId=<team>` с телом
 > `{"ssoProtection": null, "passwordProtection": null}`.
+>
+> **Сеть облака:** среда Routine по умолчанию блокирует исходящие соединения.
+> В настройках среды (Network access / Egress) надо разрешить `api.vercel.com` и
+> `api.telegram.org` — иначе деплой и Telegram-пуш не пройдут. Notion идёт через
+> коннектор и egress не требует.
 
 ### 6. Пуш в Telegram (одно сообщение за день)
 ```bash

@@ -45,7 +45,13 @@ description: Провести пользователя по настройке C
    TELEGRAM_CHAT_ID=<твой chat_id>
    VERCEL_TOKEN=<твой токен>
    ```
-4. Сохрани.
+4. Там же открой **Network access / Egress** и разреши два домена (иначе деплой и
+   Telegram заблокированы firewall'ом песочницы):
+   ```
+   api.vercel.com
+   api.telegram.org
+   ```
+5. Сохрани.
 
 ## Шаг 5. Проверка
 - Быстрый тест прямо сейчас: `/call-summary:pipeline` (соберёт сегодняшний день локально).
