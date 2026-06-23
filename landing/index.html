@@ -87,7 +87,7 @@ nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px) saturate(120%);
 
 /* ── HERO ── */
 .hero{padding:clamp(48px,9vw,104px) 0 clamp(40px,7vw,80px)}
-.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(32px,5vw,60px);align-items:center}
+.hero-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:clamp(32px,4.5vw,56px);align-items:center}
 @media(max-width:940px){.hero-grid{grid-template-columns:1fr;gap:40px}}
 .eyebrow{margin-bottom:26px}
 h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,6.3vw,66px);line-height:1;
@@ -109,8 +109,8 @@ h1 .stroke{color:transparent;-webkit-text-stroke:1.5px var(--line-strong)}
 .term-bar i:first-child{background:#e0653b}.term-bar i:nth-child(2){background:#d9a520}.term-bar i:nth-child(3){background:#0e9f6e}
 .term-title{margin-left:8px;font-family:var(--mono);font-size:11px;color:#857a63;letter-spacing:.05em}
 /* фиксированная высота — чтобы окно не «скакало», когда появляется summary */
-.term-body{padding:18px;font-family:var(--mono);font-size:12.5px;line-height:1.75;height:452px;overflow:hidden;color:#efe7d4}
-@media(max-width:480px){.term-body{height:478px}}
+.term-body{padding:20px;font-family:var(--mono);font-size:12.5px;line-height:1.75;height:516px;overflow:hidden;color:#efe7d4}
+@media(max-width:480px){.term-body{height:548px}}
 .t-line{white-space:pre-wrap;word-break:break-word}
 .t-dim{color:#8b8068}.t-prompt{color:var(--accent)}.t-spk{color:#8fb9ff}
 .cursor{display:inline-block;width:8px;height:15px;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(1) infinite}
@@ -291,10 +291,10 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
         <div id="log"></div>
         <div class="out" id="out">
           <div class="out-row out-h">// summary</div>
-          <div class="out-row out-sum">Утренний стендап: распределили задачи на день, проговорили дедлайны и вечерний урок.</div>
+          <div class="out-row out-sum">Запускаем AI-скоринг входящих лидов. Клиенту нужна интеграция — готовим КП.</div>
           <div class="out-row out-h">// tasks · кто / что / дедлайн</div>
-          <div class="out-row task"><span class="who">Миша</span><span>актуализировать CRM-таблицу</span><span class="due">сегодня</span></div>
-          <div class="out-row task"><span class="who">Максим</span><span>доработать скрипт продаж</span><span class="due">сегодня</span></div>
+          <div class="out-row task"><span class="who">Аня</span><span>внедрить AI-скоринг лидов</span><span class="due">пятница</span></div>
+          <div class="out-row task"><span class="who">Олег</span><span>КП по интеграции клиенту</span><span class="due">завтра</span></div>
           <div class="out-row out-h">// deploy</div>
           <div class="out-row out-sum"><span class="hl">✓</span> опубликовано · ссылка ушла в telegram</div>
         </div>
@@ -504,8 +504,8 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
     var logs=[
       {t:300,h:'<span class="t-dim">→ источник: </span><span class="t-prompt">notion + zoom</span>'},
       {t:600,h:'<span class="t-dim">→ встреч за сегодня: </span>2'},
-      {t:560,h:'<span class="t-spk">[10:58] Миша:</span> <span class="t-dim">актуализировать CRM</span>'},
-      {t:520,h:'<span class="t-spk">[10:59] Максим:</span> <span class="t-dim">доработать скрипт продаж</span>'},
+      {t:560,h:'<span class="t-spk">[10:30]</span> <span class="t-dim">Ежедневная планёрка</span>'},
+      {t:520,h:'<span class="t-spk">[12:00]</span> <span class="t-dim">Созвон с клиентом</span>'},
       {t:700,h:'<span class="t-prompt">✦ Claude</span> <span class="t-dim">summarizing…</span>'}
     ];
     function type(str,i){ cmdEl.textContent=str.slice(0,i);
