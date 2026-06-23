@@ -108,7 +108,9 @@ h1 .stroke{color:transparent;-webkit-text-stroke:1.5px var(--line-strong)}
 .term-bar i{width:11px;height:11px;border-radius:50%;background:#3a2f1d;display:block}
 .term-bar i:first-child{background:#e0653b}.term-bar i:nth-child(2){background:#d9a520}.term-bar i:nth-child(3){background:#0e9f6e}
 .term-title{margin-left:8px;font-family:var(--mono);font-size:11px;color:#857a63;letter-spacing:.05em}
-.term-body{padding:18px;font-family:var(--mono);font-size:12.5px;line-height:1.75;min-height:344px;color:#efe7d4}
+/* фиксированная высота — чтобы окно не «скакало», когда появляется summary */
+.term-body{padding:18px;font-family:var(--mono);font-size:12.5px;line-height:1.75;height:452px;overflow:hidden;color:#efe7d4}
+@media(max-width:480px){.term-body{height:478px}}
 .t-line{white-space:pre-wrap;word-break:break-word}
 .t-dim{color:#8b8068}.t-prompt{color:var(--accent)}.t-spk{color:#8fb9ff}
 .cursor{display:inline-block;width:8px;height:15px;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(1) infinite}
@@ -501,10 +503,10 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
     var cmd='call-summary pipeline --today';
     var logs=[
       {t:300,h:'<span class="t-dim">→ источник: </span><span class="t-prompt">notion + zoom</span>'},
-      {t:650,h:'<span class="t-dim">→ найдено встреч за сегодня: </span>2'},
-      {t:600,h:'<span class="t-spk">[10:58] Миша:</span> <span class="t-dim">CRM актуализировать нужно, сделаешь?</span>'},
-      {t:520,h:'<span class="t-spk">[10:59] Максим:</span> <span class="t-dim">продажника подправлю, два сообщения в скрипте…</span>'},
-      {t:700,h:'<span class="t-prompt">✦ Claude</span> <span class="t-dim">summarizing transcript…</span>'}
+      {t:600,h:'<span class="t-dim">→ встреч за сегодня: </span>2'},
+      {t:560,h:'<span class="t-spk">[10:58] Миша:</span> <span class="t-dim">актуализировать CRM</span>'},
+      {t:520,h:'<span class="t-spk">[10:59] Максим:</span> <span class="t-dim">доработать скрипт продаж</span>'},
+      {t:700,h:'<span class="t-prompt">✦ Claude</span> <span class="t-dim">summarizing…</span>'}
     ];
     function type(str,i){ cmdEl.textContent=str.slice(0,i);
       if(i<=str.length){ setTimeout(function(){type(str,i+1);},34);} else { setTimeout(runLogs,420);} }
