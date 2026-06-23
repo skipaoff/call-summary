@@ -543,12 +543,15 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
   var c = document.getElementById('trail');
   if(!c || !fine || reduce){ if(c) c.style.display='none'; return; }
   var ctx = c.getContext('2d'), dpr = Math.min(window.devicePixelRatio||1, 2), pts = [], LIFE = 500;
+  var mx=0, my=0, has=false;
   function size(){ c.width=innerWidth*dpr; c.height=innerHeight*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); }
   size(); window.addEventListener('resize', size);
   window.addEventListener('mousemove', function(e){
+    mx=e.clientX; my=e.clientY; has=true;
     pts.push({x:e.clientX, y:e.clientY, t:performance.now()});
     if(pts.length>80) pts.shift();
   });
+  window.addEventListener('mouseout', function(e){ if(!e.relatedTarget) has=false; });
   function frame(now){
     ctx.clearRect(0,0,innerWidth,innerHeight);
     while(pts.length && now-pts[0].t>LIFE) pts.shift();
@@ -560,6 +563,18 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
       ctx.strokeStyle='rgba(233,178,0,'+(a*0.9)+')';
       ctx.lineWidth=a*7+0.5;
       ctx.shadowColor='rgba(253,213,6,'+(a*0.55)+')'; ctx.shadowBlur=a*12;
+      ctx.stroke();
+    }
+    // кончик кисти — точка всегда под курсором
+    if(has){
+      ctx.beginPath();
+      ctx.arc(mx,my,5,0,Math.PI*2);
+      ctx.fillStyle='rgba(233,178,0,0.95)';
+      ctx.shadowColor='rgba(253,213,6,0.7)'; ctx.shadowBlur=14;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(mx,my,8.5,0,Math.PI*2);
+      ctx.lineWidth=1.5; ctx.strokeStyle='rgba(233,178,0,0.5)'; ctx.shadowBlur=0;
       ctx.stroke();
     }
     requestAnimationFrame(frame);
