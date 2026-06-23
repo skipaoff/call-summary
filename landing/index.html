@@ -430,8 +430,8 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
           <li><span class="ok">✓</span> Обновления и новые источники</li>
           <li><span class="ok">✓</span> Данные остаются у тебя — мы ничего не храним</li>
         </ul>
-        <button class="btn btn-primary" id="payBtn" style="width:100%">Оплатить $5 <span class="arrow">→</span></button>
-        <div class="pay-stub" id="payStub"></div>
+        <a class="btn btn-primary" href="https://t.me/skipa_pay_bot" target="_blank" rel="noopener" style="width:100%">Оплатить $5 в Telegram <span class="arrow">→</span></a>
+        <div class="pay-stub">крипта через <a href="https://t.me/skipa_pay_bot" target="_blank" rel="noopener" style="color:var(--accent-ink)">@skipa_pay_bot</a> · доступ приходит сразу после оплаты</div>
       </div>
       <div class="price-side">
         <div class="side-card card">
@@ -472,7 +472,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
       <span class="kicker mono" style="display:block;margin-bottom:18px"><span class="hl">// go</span></span>
       <h2>Хватит терять <span class="y">договорённости</span></h2>
       <p class="lede">Поставь за 5 минут и пусть каждый вечер сводка приходит сама.</p>
-      <a href="#price" class="btn btn-primary" style="padding:15px 30px">Получить доступ — $5 <span class="arrow">→</span></a>
+      <a href="https://t.me/skipa_pay_bot" target="_blank" rel="noopener" class="btn btn-primary" style="padding:15px 30px">Получить доступ — $5 <span class="arrow">→</span></a>
     </div>
   </div>
 </section>
@@ -524,10 +524,6 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
       setTimeout(function(){type(cmd,0);},500); }
     setTimeout(function(){type(cmd,0);},600);
   }
-
-  var payBtn=document.getElementById('payBtn'), payStub=document.getElementById('payStub');
-  if(payBtn){ payBtn.addEventListener('click',function(){
-    payStub.innerHTML='<span class="hl">⌁</span> приём оплаты подключается — скоро тут будет crypto-инвойс'; });}
 
   var fl=document.getElementById('footlog');
   if(fl && !reduce){
