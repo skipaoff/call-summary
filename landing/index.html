@@ -227,7 +227,7 @@ summary{list-style:none;cursor:pointer;padding:22px 0;display:flex;align-items:c
 summary::-webkit-details-marker{display:none}
 summary .pm{font-family:var(--mono);color:var(--accent-deep);font-size:22px;transition:transform .2s;flex:none}
 details[open] summary .pm{transform:rotate(45deg)}
-details p{padding:0 0 24px;color:var(--muted);max-width:72ch;font-size:15px}
+details p{padding:0 0 24px;color:var(--muted);max-width:72ch;font-size:15px;overflow:hidden}
 details p .hl{color:var(--accent-ink);font-weight:600}
 
 /* ── ФИНАЛ ── */
@@ -580,6 +580,36 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
+})();
+
+/* плавное раскрытие FAQ (нативный details открывается рывком) */
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion:reduce)').matches;
+  document.querySelectorAll('.faq details').forEach(function(d){
+    var sum=d.querySelector('summary'), body=d.querySelector('p');
+    if(!sum||!body) return;
+    body.style.height = d.open ? 'auto' : '0px';
+    var busy=false;
+    sum.addEventListener('click', function(e){
+      e.preventDefault();
+      if(busy) return;
+      if(reduce){ d.open=!d.open; body.style.height=d.open?'auto':'0px'; return; }
+      busy=true;
+      if(d.open){
+        body.style.height=body.scrollHeight+'px';
+        requestAnimationFrame(function(){ body.style.transition='height .32s ease'; body.style.height='0px'; });
+        body.addEventListener('transitionend', function te(){ body.removeEventListener('transitionend',te);
+          body.style.transition=''; d.open=false; busy=false; });
+      } else {
+        d.open=true;
+        var end=body.scrollHeight;
+        body.style.height='0px';
+        requestAnimationFrame(function(){ body.style.transition='height .32s ease'; body.style.height=end+'px'; });
+        body.addEventListener('transitionend', function te(){ body.removeEventListener('transitionend',te);
+          body.style.transition=''; body.style.height='auto'; busy=false; });
+      }
+    });
+  });
 })();
 </script>
 </body>
