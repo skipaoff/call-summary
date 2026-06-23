@@ -7,11 +7,17 @@
   "repository": "https://github.com/skipaoff/call-summary",
   "mcpServers": "./.mcp.json",
   "userConfig": {
+    "source": {
+      "type": "string",
+      "title": "Источник записей: notion или zoom",
+      "description": "Откуда брать созвоны. Notion AI Meeting Notes или Zoom (облачные записи, нужен Zoom Pro+).",
+      "required": true
+    },
     "notion_page_url": {
       "type": "string",
       "title": "Notion: ссылка на страницу записей встреч",
-      "description": "Полный URL страницы, куда Notion AI складывает записи созвонов.",
-      "required": true
+      "description": "Только для источника notion: URL страницы с записями созвонов.",
+      "required": false
     },
     "telegram_bot_token": {
       "type": "string",

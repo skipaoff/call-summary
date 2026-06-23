@@ -1,8 +1,13 @@
 {
   "source": {
     "type": "notion",
-    "notionPageUrl": "https://app.notion.com/p/384474edfa1e8077961df8377aaf50ec",
-    "notionPageId": "384474edfa1e8077961df8377aaf50ec"
+    "notion": {
+      "pageUrl": "https://app.notion.com/p/384474edfa1e8077961df8377aaf50ec",
+      "pageId": "384474edfa1e8077961df8377aaf50ec"
+    },
+    "zoom": {
+      "userId": "me"
+    }
   },
   "site": {
     "name": "Call Summary",

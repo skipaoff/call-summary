@@ -5,8 +5,11 @@
 твоего сервера и без установки чего-либо на компьютер.
 
 ## Что понадобится
-1. **Notion** с записями созвонов (Notion AI Meeting Notes). Коннектор Notion в Claude —
-   у многих уже подключён.
+1. **Источник записей — на выбор:**
+   - **Notion** (Notion AI Meeting Notes) — коннектор Notion в Claude (у многих подключён).
+   - **Zoom** — коннектор Zoom в Claude. Нужен тариф **Zoom Pro и выше** с включёнными
+     «Cloud recording» и «Audio transcription» (включить **до** созвонов). На бесплатном
+     Zoom запись только локальная — её не видно.
 2. **Telegram-бот:** @BotFather → `/newbot` → токен. chat_id: напиши боту, открой
    `https://api.telegram.org/bot<ТОКЕН>/getUpdates` → возьми `chat.id`.
 3. **Vercel token:** vercel.com → Settings → Tokens → Create.
@@ -17,20 +20,23 @@
 Открой **https://claude.ai/code/routines** → **Create routine**.
 - **Название:** `Сводка созвонов`
 - **Расписание:** каждый день вечером (напр. 21:00).
-- **Коннекторы:** включи **Notion**.
+- **Коннекторы:** включи **Notion** или **Zoom** — смотря что выбрал источником.
 
 ### 2. Вставь промпт
-В поле инструкций вставь это (замени только ссылку на свою страницу Notion):
+В поле инструкций вставь это (впиши источник; для Notion — ещё ссылку на страницу):
 
 ```
 Собери мою ежедневную сводку созвонов строго по RUNBOOK.md из репозитория.
+Источник: ВПИШИ notion ИЛИ zoom.
+Если notion — моя страница записей: ВСТАВЬ_ССЫЛКУ_NOTION.
 
 1. git clone https://github.com/skipaoff/call-summary /tmp/cs && cd /tmp/cs
-2. Прочитай RUNBOOK.md. Моя страница записей в Notion: ВСТАВЬ_СВОЮ_ССЫЛКУ_NOTION
-   Токены — в переменных окружения: $VERCEL_TOKEN, $TELEGRAM_BOT_TOKEN, $TELEGRAM_CHAT_ID.
-3. Через коннектор Notion отбери встречи за сегодня (сверь date -u), для каждой
-   возьми транскрипт (include_transcript=true), сделай саммари (схема в RUNBOOK) и
-   собери days/<дата>.json.
+2. Прочитай RUNBOOK.md. Токены — в переменных окружения: $VERCEL_TOKEN,
+   $TELEGRAM_BOT_TOKEN, $TELEGRAM_CHAT_ID.
+3. Достань встречи за сегодня (date -u) из выбранного источника:
+   - notion: через Notion-коннектор по моей ссылке, транскрипт include_transcript=true;
+   - zoom: через Zoom-коннектор — облачные записи за сегодня + их транскрипты (VTT).
+   Для каждой сделай саммари (схема в RUNBOOK) → days/<дата>.json.
 4. Если встреч за сегодня нет — закончи, ничего не публикуй.
 5. node scripts/build-day.mjs days/<дата>.json out/site
 6. Задеплой out/site на Vercel под моим аккаунтом (vercel deploy --prod --yes
