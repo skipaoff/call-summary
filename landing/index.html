@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Call Summary — созвоны превращаются в сводку за день</title>
+<meta name="description" content="AI читает транскрипты твоих созвонов из Notion и Zoom, пишет кастомное саммари и каждый вечер публикует страницу дня + шлёт ссылку в Telegram. Без сервера.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* тёплая бумага «дорогой блокнот» */
+  --paper:#f7f2e8;
+  --card:#fffdf8;
+  --muted-surface:#f1ebdd;
+  --ink:#211d16;
+  --muted:#6c6457;
+  --faint:#9a917f;
+  --line:#e7decd;
+  --line-strong:#d7ccb5;
+  --dot:rgba(120,98,52,.16);
+  /* акцент */
+  --accent:#fdd506;
+  --accent-deep:#e9b200;
+  --accent-ink:#8a6d00;
+  --accent-soft:#fcf3cb;
+  --ring:rgba(233,178,0,.45);
+  --ok:#3f8f4e;
+  /* шрифты */
+  --display:"Unbounded","Arial Black",sans-serif;
+  --sans:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+  --px:clamp(20px,5vw,48px);
+  --maxw:1180px;
+  --r:14px;--r-sm:10px;
+  --shadow:0 1px 2px rgba(60,45,15,.05),0 8px 24px -16px rgba(60,45,15,.18);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background-color:var(--paper);
+  background-image:radial-gradient(var(--dot) 1.1px,transparent 1.2px);
+  background-size:22px 22px;background-position:-1px -1px;
+  color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+}
+/* мягкое тёплое свечение сверху — премиальность */
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(70vw 44vh at 80% -10%,#fde9a033,transparent 70%),
+    radial-gradient(60vw 40vh at 0% 108%,#f6edd633,transparent 70%);}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:var(--maxw);margin:0 auto;padding-left:var(--px);padding-right:var(--px)}
+:focus-visible{outline:2px solid var(--ring);outline-offset:3px;border-radius:6px}
+
+.mono{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.mono .hl,.hl{color:var(--accent-ink)}
+
+/* бейдж (shadcn) */
+.badge{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+  border:1px solid var(--line-strong);background:var(--card);padding:6px 12px;border-radius:999px}
+.badge .blip{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px #3f8f4e22;animation:pulse 2s infinite}
+
+/* кнопки (shadcn) */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:9px;font-family:var(--sans);
+  font-weight:600;font-size:14px;cursor:pointer;border:1px solid transparent;border-radius:var(--r-sm);
+  padding:12px 20px;transition:transform .15s,background .15s,border-color .15s,color .15s,box-shadow .15s}
+.btn .arrow{transition:transform .2s}
+.btn:hover .arrow{transform:translateX(4px)}
+.btn-primary{background:var(--accent);color:#2a2106;box-shadow:var(--shadow)}
+.btn-primary:hover{background:var(--accent-deep);transform:translateY(-1px)}
+.btn-ghost{background:var(--card);color:var(--ink);border-color:var(--line-strong)}
+.btn-ghost:hover{border-color:var(--accent-deep);color:var(--accent-ink)}
+
+/* ── навигация ── */
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(10px) saturate(120%);
+  background:#f7f2e8cc;border-bottom:1px solid var(--line)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;height:64px}
+.logo{font-family:var(--mono);font-weight:700;font-size:15px;display:flex;align-items:center;gap:9px;color:var(--ink)}
+.logo .dot{width:9px;height:9px;background:var(--accent);border-radius:50%;box-shadow:0 0 0 4px #fdd50633;animation:pulse 2.4s infinite}
+.logo span{color:var(--faint)}
+.nav-links{display:flex;gap:28px;font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.nav-links a:hover{color:var(--accent-ink)}
+@media(max-width:820px){.nav-links{display:none}}
+
+/* ── HERO ── */
+.hero{padding:clamp(48px,9vw,104px) 0 clamp(40px,7vw,80px)}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:clamp(32px,5vw,60px);align-items:center}
+@media(max-width:940px){.hero-grid{grid-template-columns:1fr;gap:40px}}
+.eyebrow{margin-bottom:26px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(34px,6.3vw,66px);line-height:1;
+  letter-spacing:-.02em;text-transform:uppercase;margin-bottom:22px;color:var(--ink)}
+h1 .y{color:var(--accent-deep)}
+h1 .stroke{color:transparent;-webkit-text-stroke:1.5px var(--line-strong)}
+.lede{font-size:clamp(16px,2.1vw,19px);color:var(--muted);max-width:46ch;margin-bottom:30px}
+.lede b{color:var(--ink);font-weight:600}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.hero-meta{margin-top:26px;display:flex;gap:22px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;
+  letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.hero-meta b{color:var(--ink);font-weight:600}
+
+/* терминал — тёмная код-панель на бумаге (контраст = премиум) */
+.term{border:1px solid #2c2418;background:linear-gradient(180deg,#171109,#0e0a05);
+  border-radius:var(--r);overflow:hidden;box-shadow:0 30px 70px -30px rgba(40,30,8,.5),var(--shadow)}
+.term-bar{display:flex;align-items:center;gap:8px;padding:12px 15px;border-bottom:1px solid #241c12;background:#120c06}
+.term-bar i{width:11px;height:11px;border-radius:50%;background:#3a2f1d;display:block}
+.term-bar i:first-child{background:#e0653b}.term-bar i:nth-child(2){background:#d9a520}.term-bar i:nth-child(3){background:#0e9f6e}
+.term-title{margin-left:8px;font-family:var(--mono);font-size:11px;color:#857a63;letter-spacing:.05em}
+.term-body{padding:18px;font-family:var(--mono);font-size:12.5px;line-height:1.75;min-height:344px;color:#efe7d4}
+.t-line{white-space:pre-wrap;word-break:break-word}
+.t-dim{color:#8b8068}.t-prompt{color:var(--accent)}.t-spk{color:#8fb9ff}
+.cursor{display:inline-block;width:8px;height:15px;background:var(--accent);vertical-align:-2px;animation:blink 1s steps(1) infinite}
+.out{margin-top:14px;border-top:1px dashed #3a2f1d;padding-top:14px;display:none}
+.out.show{display:block}
+.out-row{opacity:0;transform:translateY(6px);transition:opacity .4s,transform .4s}
+.out-row.in{opacity:1;transform:none}
+.out-h{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9a8f73;margin:10px 0 5px}
+.out-sum{color:#d8cdb4;font-family:var(--sans);font-size:13.5px;line-height:1.55}
+.out-sum .hl{color:var(--accent)}
+.task{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+  border-left:2px solid var(--accent);background:#1b140b;padding:8px 11px;margin:6px 0;font-size:12px;border-radius:0 6px 6px 0}
+.task .who{color:var(--accent);font-weight:700}
+.task .due{color:#8b8068;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+
+/* ── секции ── */
+section{padding:clamp(54px,8vw,108px) 0}
+.sec-head{margin-bottom:46px;max-width:64ch}
+.kicker{display:block;margin-bottom:14px}
+h2{font-family:var(--display);font-weight:700;font-size:clamp(26px,4.3vw,44px);line-height:1.05;
+  letter-spacing:-.015em;text-transform:uppercase;color:var(--ink)}
+h2 .y{color:var(--accent-deep)}
+.sec-sub{color:var(--muted);margin-top:16px;font-size:16px;max-width:56ch}
+
+.rv{opacity:0;transform:translateY(22px);transition:opacity .7s cubic-bezier(.2,.7,.2,1),transform .7s cubic-bezier(.2,.7,.2,1)}
+.rv.in{opacity:1;transform:none}
+.line-top{border-top:1px solid var(--line)}
+
+/* карточка-основа (shadcn) */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+  transition:border-color .2s,transform .2s,box-shadow .2s}
+.card:hover{border-color:var(--line-strong);transform:translateY(-3px)}
+
+/* ── БОЛИ ── */
+.pain-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:860px){.pain-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.pain-grid{grid-template-columns:1fr}}
+.pain{padding:26px 24px}
+.pain .n{font-family:var(--mono);font-size:11px;color:var(--accent-ink);letter-spacing:.08em}
+.pain h3{font-family:var(--display);font-weight:500;font-size:18px;margin:14px 0 8px;letter-spacing:-.01em;line-height:1.22;color:var(--ink)}
+.pain p{color:var(--muted);font-size:14.5px}
+.pain .x{color:#c0552f;font-weight:600}
+
+/* ── ПАЙПЛАЙН ── */
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;align-items:center;margin-bottom:50px}
+@media(max-width:860px){.flow{grid-template-columns:1fr;gap:14px}.conn{display:none}}
+.stage{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:20px;box-shadow:var(--shadow)}
+.stage .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--faint)}
+.stage .node{display:flex;align-items:center;gap:10px;margin-top:12px;font-family:var(--mono);font-weight:700;font-size:14px;color:var(--ink)}
+.stage .node+.node{margin-top:9px}
+.stage .ic{width:28px;height:28px;border:1px solid var(--line-strong);border-radius:8px;display:grid;place-items:center;font-size:13px;color:var(--accent-ink);background:var(--accent-soft)}
+.stage.brain{border-color:var(--accent-deep);box-shadow:0 0 0 1px var(--accent-deep) inset,var(--shadow)}
+.stage.brain .node{color:var(--accent-ink)}
+.conn{position:relative;height:2px;width:clamp(28px,5vw,60px);background:var(--line-strong);overflow:visible}
+.conn .pkt{position:absolute;top:50%;left:0;width:7px;height:7px;border-radius:50%;background:var(--accent-deep);
+  box-shadow:0 0 0 3px #e9b20022;transform:translateY(-50%);animation:travel 2.4s linear infinite}
+.conn:nth-of-type(4) .pkt{animation-delay:1.2s}
+.steps{display:grid;grid-template-columns:repeat(5,1fr);gap:0;border-top:1px solid var(--line)}
+@media(max-width:860px){.steps{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.steps{grid-template-columns:1fr}}
+.step{padding:24px 22px 0 0;border-right:1px solid var(--line)}
+.step:last-child{border-right:none}
+.step .sn{font-family:var(--mono);font-size:12px;color:var(--accent-ink);letter-spacing:.05em}
+.step h4{font-family:var(--sans);font-weight:600;font-size:15.5px;margin:13px 0 7px;color:var(--ink)}
+.step p{color:var(--muted);font-size:13.5px}
+
+/* ── ВЫВОД-ПРЕВЬЮ ── */
+.day{overflow:hidden}
+.day-top{display:flex;align-items:baseline;justify-content:space-between;padding:22px 26px;border-bottom:1px solid var(--line);gap:14px;flex-wrap:wrap}
+.day-top h3{font-family:var(--display);font-weight:700;font-size:clamp(20px,3vw,30px);text-transform:uppercase;letter-spacing:-.01em;color:var(--ink)}
+.day-call{padding:20px 26px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr;gap:18px}
+.day-call:last-child{border-bottom:none}
+.day-call .cn{font-family:var(--mono);font-size:22px;color:var(--accent-deep)}
+.day-call .ct{font-family:var(--display);font-weight:500;font-size:17px;margin-bottom:5px;color:var(--ink);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.day-call .cmeta{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint)}
+.day-call .cmeta b{color:var(--accent-ink);font-weight:600}
+.src-tag{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line-strong);
+  padding:2px 8px;border-radius:999px;color:var(--muted);background:var(--muted-surface)}
+
+/* ── ФИЧИ ── */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media(max-width:860px){.feat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:560px){.feat-grid{grid-template-columns:1fr}}
+.feat{padding:24px}
+.feat .fi{font-family:var(--mono);color:var(--accent-ink);font-size:13px;letter-spacing:.08em}
+.feat h4{font-family:var(--display);font-weight:500;font-size:17px;margin:13px 0 8px;letter-spacing:-.01em;color:var(--ink)}
+.feat p{color:var(--muted);font-size:14px}
+
+/* ── ЦЕНА ── */
+.price-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:stretch}
+@media(max-width:860px){.price-grid{grid-template-columns:1fr}}
+.price-card{padding:clamp(28px,4vw,42px);position:relative;overflow:hidden}
+.price-card::before{content:"";position:absolute;top:0;right:0;width:180px;height:180px;
+  background:radial-gradient(circle at top right,var(--accent-soft),transparent 70%)}
+.price-tag{display:flex;align-items:flex-end;gap:12px;margin:18px 0 6px;position:relative}
+.price-tag .amt{font-family:var(--display);font-weight:800;font-size:clamp(48px,8vw,78px);line-height:.9;color:var(--ink)}
+.price-tag .cur{font-family:var(--mono);color:var(--muted);font-size:14px;padding-bottom:12px}
+.price-note{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:24px}
+.incl{list-style:none;display:flex;flex-direction:column;gap:12px;margin:22px 0 28px}
+.incl li{display:grid;grid-template-columns:auto 1fr;gap:11px;font-size:14.5px;color:var(--ink)}
+.incl .ok{color:var(--accent-deep);font-weight:700}
+.price-side{display:flex;flex-direction:column;gap:16px}
+.side-card{padding:22px;flex:1}
+.side-card .sh{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:12px}
+.side-card p{color:var(--muted);font-size:14px}
+.side-card p b{color:var(--ink)}
+.pay-stub{margin-top:14px;font-family:var(--mono);font-size:11px;color:var(--muted);min-height:16px}
+
+/* ── FAQ ── */
+details{border-bottom:1px solid var(--line)}
+summary{list-style:none;cursor:pointer;padding:22px 0;display:flex;align-items:center;justify-content:space-between;gap:18px;
+  font-family:var(--display);font-weight:500;font-size:clamp(16px,2.3vw,20px);letter-spacing:-.01em;color:var(--ink)}
+summary::-webkit-details-marker{display:none}
+summary .pm{font-family:var(--mono);color:var(--accent-deep);font-size:22px;transition:transform .2s;flex:none}
+details[open] summary .pm{transform:rotate(45deg)}
+details p{padding:0 0 24px;color:var(--muted);max-width:72ch;font-size:15px}
+details p .hl{color:var(--accent-ink);font-weight:600}
+
+/* ── ФИНАЛ ── */
+.final{text-align:center}
+.final .sec-head{margin:0 auto 0}
+.final h2{margin-bottom:20px}
+.final .lede{margin:0 auto 28px}
+
+footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);font-size:11px;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--faint)}
+.foot-in{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:center}
+.log .ok{color:var(--ok)}
+
+@keyframes blink{50%{opacity:0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes travel{0%{left:0;opacity:0}10%{opacity:1}90%{opacity:1}100%{left:100%;opacity:0}}
+
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .rv{opacity:1;transform:none}.cursor{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap nav-in">
+    <a href="#top" class="logo"><span class="dot"></span>call_summary<span>.exe</span></a>
+    <div class="nav-links">
+      <a href="#pain">боли</a>
+      <a href="#how">как работает</a>
+      <a href="#features">фичи</a>
+      <a href="#price">цена</a>
+      <a href="#faq">faq</a>
+    </div>
+    <a href="#price" class="btn btn-primary">Получить доступ <span class="arrow">→</span></a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<header class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div>
+      <span class="badge eyebrow"><span class="blip"></span>работает на Claude · без сервера</span>
+      <h1>Созвоны<br><span class="y">превращаются</span><br>в сводку <span class="stroke">за день</span></h1>
+      <p class="lede">AI читает транскрипты твоих звонков из <b>Notion</b> и <b>Zoom</b>, пишет своё саммари и каждый вечер сам публикует <b>страницу дня</b> и шлёт ссылку в <b>Telegram</b>. Ты просто открываешь и видишь: кто, что, к какому сроку.</p>
+      <div class="hero-cta">
+        <a href="#price" class="btn btn-primary">Получить доступ — $5 <span class="arrow">→</span></a>
+        <a href="#how" class="btn btn-ghost">Как это работает</a>
+      </div>
+      <div class="hero-meta">
+        <span><b>2</b> источника · notion / zoom</span>
+        <span><b>0</b> серверов</span>
+        <span><b>5</b> минут на установку</span>
+      </div>
+    </div>
+
+    <div class="term" aria-hidden="true">
+      <div class="term-bar"><i></i><i></i><i></i><span class="term-title">call-summary — pipeline.run</span></div>
+      <div class="term-body" id="term">
+        <div class="t-line"><span class="t-prompt">$</span> <span id="cmd"></span><span class="cursor" id="cur"></span></div>
+        <div id="log"></div>
+        <div class="out" id="out">
+          <div class="out-row out-h">// summary</div>
+          <div class="out-row out-sum">Утренний стендап: распределили задачи на день, проговорили дедлайны и вечерний урок.</div>
+          <div class="out-row out-h">// tasks · кто / что / дедлайн</div>
+          <div class="out-row task"><span class="who">Миша</span><span>актуализировать CRM-таблицу</span><span class="due">сегодня</span></div>
+          <div class="out-row task"><span class="who">Максим</span><span>доработать скрипт продаж</span><span class="due">сегодня</span></div>
+          <div class="out-row out-h">// deploy</div>
+          <div class="out-row out-sum"><span class="hl">✓</span> опубликовано · ссылка ушла в telegram</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ── БОЛИ ── -->
+<section class="pains line-top" id="pain">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker mono"><span class="hl">// 01</span> &nbsp;проблема</span>
+      <h2>После созвона — <span class="y">каша</span>, а не ясность</h2>
+      <p class="sec-sub">Договорённости расплываются, задачи теряются, транскрипт на 40 минут никто не перечитывает. Знакомо?</p>
+    </div>
+    <div class="pain-grid rv">
+      <div class="pain card"><div class="n">P-01</div><h3>«Кто что обещал?»</h3><p>К концу дня половина договорённостей забыта, а дедлайны живут только в чьей-то голове.</p></div>
+      <div class="pain card"><div class="n">P-02</div><h3>Транскрипт ≠ польза</h3><p>Сырая расшифровка на тысячи слов. <span class="x">Никто</span> не открывает её второй раз.</p></div>
+      <div class="pain card"><div class="n">P-03</div><h3>Авто-саммари никакое</h3><p>Встроенное саммари Notion — общее и ненастраиваемое. Не под твой формат и не про задачи.</p></div>
+      <div class="pain card"><div class="n">P-04</div><h3>Нечего скинуть команде</h3><p>Нет одной аккуратной ссылки с выводами и задачами, которую не стыдно отправить.</p></div>
+      <div class="pain card"><div class="n">P-05</div><h3>Руками — не вариант</h3><p>Писать конспект после каждого звонка дорого по времени и всё равно забывается.</p></div>
+      <div class="pain card"><div class="n">P-06</div><h3>Сервер ради этого?</h3><p>Поднимать бэкенд, базу и хостинг ради конспектов — оверкилл, который некому поддерживать.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── КАК РАБОТАЕТ ── -->
+<section class="pipe line-top" id="how">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker mono"><span class="hl">// 02</span> &nbsp;пайплайн</span>
+      <h2>Транскрипт → <span class="y">саммари</span> → сайт + telegram</h2>
+      <p class="sec-sub">Один проход вечером по расписанию через Claude Routines. Claude как агент сам ходит по твоим коннекторам — своего бэкенда нет.</p>
+    </div>
+
+    <div class="flow rv">
+      <div class="stage">
+        <div class="lbl">источник</div>
+        <div class="node"><span class="ic">N</span> Notion</div>
+        <div class="node"><span class="ic">Z</span> Zoom</div>
+      </div>
+      <div class="conn"><span class="pkt"></span></div>
+      <div class="stage brain">
+        <div class="lbl">движок</div>
+        <div class="node"><span class="ic">✦</span> Claude</div>
+        <div class="node" style="color:var(--muted);font-weight:500"><span class="ic">⌁</span> summary</div>
+      </div>
+      <div class="conn"><span class="pkt"></span></div>
+      <div class="stage">
+        <div class="lbl">выход</div>
+        <div class="node"><span class="ic">▲</span> Vercel</div>
+        <div class="node"><span class="ic">✈</span> Telegram</div>
+      </div>
+    </div>
+
+    <div class="steps rv">
+      <div class="step"><div class="sn">01</div><h4>Подключаешь источник</h4><p>Notion, Zoom или оба сразу — своими коннекторами в Claude.</p></div>
+      <div class="step"><div class="sn">02</div><h4>Claude читает день</h4><p>Берёт транскрипты всех сегодняшних звонков.</p></div>
+      <div class="step"><div class="sn">03</div><h4>Пишет саммари</h4><p>Выводы, задачи кто/что/дедлайн, напоминания — твоё, не платформенное.</p></div>
+      <div class="step"><div class="sn">04</div><h4>Публикует страницу</h4><p>Мини-сайт за день на Vercel: индекс звонков + подстраница на каждый.</p></div>
+      <div class="step"><div class="sn">05</div><h4>Шлёт в Telegram</h4><p>Краткая сводка и вечная ссылка на день. Чат = твой архив.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ВЫВОД ── -->
+<section class="preview line-top">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker mono"><span class="hl">// 03</span> &nbsp;результат</span>
+      <h2>Вот что получает <span class="y">команда</span></h2>
+      <p class="sec-sub">Каждый день — своя страница. Постоянная ссылка живёт вечно: история ссылок в Telegram и есть архив.</p>
+    </div>
+    <div class="day card rv">
+      <div class="day-top">
+        <h3>Сводка за 19 июня</h3>
+        <span class="mono"><span class="hl">2</span> встречи · notion + zoom</span>
+      </div>
+      <div class="day-call">
+        <div class="cn">12:58</div>
+        <div>
+          <div class="ct">Короткий стендап: планы на день <span class="src-tag">notion</span></div>
+          <div class="cmeta"><b>2</b> задачи · 2 решения · Миша, Максим</div>
+        </div>
+      </div>
+      <div class="day-call">
+        <div class="cn">16:30</div>
+        <div>
+          <div class="ct">Демо клиенту: интеграция <span class="src-tag">zoom</span></div>
+          <div class="cmeta"><b>3</b> задачи · 1 решение · дедлайн пятница</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ФИЧИ ── -->
+<section class="features line-top" id="features">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker mono"><span class="hl">// 04</span> &nbsp;что внутри</span>
+      <h2>Собрано как <span class="y">инструмент</span>, а не игрушка</h2>
+    </div>
+    <div class="feat-grid rv">
+      <div class="feat card"><div class="fi">[src]</div><h4>Сменный источник</h4><p>Notion AI Meeting Notes, Zoom-облако или оба. Новый источник — пара мест в коде.</p></div>
+      <div class="feat card"><div class="fi">[ai]</div><h4>Кастомное саммари</h4><p>Claude пишет из транскрипта по твоему формату. Не общая выжимка платформы.</p></div>
+      <div class="feat card"><div class="fi">[web]</div><h4>Мини-сайт за день</h4><p>Индекс звонков + подстраница на каждый, в твоём стиле. Чистая статика.</p></div>
+      <div class="feat card"><div class="fi">[∞]</div><h4>Вечный архив</h4><p>Каждый день — постоянный публичный URL. Ничего не теряется, БД не нужна.</p></div>
+      <div class="feat card"><div class="fi">[cron]</div><h4>По расписанию</h4><p>Claude Routines гоняют пайплайн каждый вечер сами. Ты ничего не запускаешь.</p></div>
+      <div class="feat card"><div class="fi">[0]</div><h4>Без бэкенда</h4><p>Нет сервера, нет хостинга для тебя. Данные живут в твоих аккаунтах.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── ЦЕНА ── -->
+<section class="pricing line-top" id="price">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker mono"><span class="hl">// 05</span> &nbsp;доступ</span>
+      <h2>Один раз. <span class="y">Пять долларов.</span></h2>
+      <p class="sec-sub">Без подписок, без налогов, без e-mail. Платишь криптой — получаешь ссылку и ставишь за 5 минут.</p>
+    </div>
+    <div class="price-grid rv">
+      <div class="price-card card">
+        <span class="mono">// lifetime access</span>
+        <div class="price-tag"><span class="amt">$5</span><span class="cur">≈ USDT / TON</span></div>
+        <div class="price-note">разовый платёж · крипта</div>
+        <ul class="incl">
+          <li><span class="ok">✓</span> Репозиторий-плагин со всем пайплайном</li>
+          <li><span class="ok">✓</span> Гайд установки за 5 минут (Notion / Zoom / оба)</li>
+          <li><span class="ok">✓</span> Готовый промпт рутины — копипаст и поехали</li>
+          <li><span class="ok">✓</span> Обновления и новые источники</li>
+          <li><span class="ok">✓</span> Данные остаются у тебя — мы ничего не храним</li>
+        </ul>
+        <button class="btn btn-primary" id="payBtn" style="width:100%">Оплатить $5 <span class="arrow">→</span></button>
+        <div class="pay-stub" id="payStub"></div>
+      </div>
+      <div class="price-side">
+        <div class="side-card card">
+          <div class="sh">// требования</div>
+          <p>Аккаунт Claude. Источник: Notion AI Meeting Notes или Zoom <b class="hl">Pro+</b> с облачной записью и транскрипцией. Свой Vercel и Telegram-бот (бесплатно).</p>
+        </div>
+        <div class="side-card card">
+          <div class="sh">// почему так дёшево</div>
+          <p>Продукт крутится в облаке Claude на <b>твоих</b> доступах. Нам нечего хостить и не за что брать ежемесячно — поэтому разовые $5, а не подписка.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="faq line-top" id="faq">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker mono"><span class="hl">// 06</span> &nbsp;вопросы</span>
+      <h2>Коротко о <span class="y">главном</span></h2>
+    </div>
+    <div class="rv">
+      <details open><summary>Нужен ли свой сервер или хостинг? <span class="pm">+</span></summary><p>Нет. Пайплайн запускается в облаке Claude по расписанию (Routines). Сайт — статика на Vercel. Поддерживать нечего.</p></details>
+      <details><summary>Откуда берутся записи? <span class="pm">+</span></summary><p>Из Notion AI Meeting Notes и/или Zoom (облачные записи с транскрипцией). Можно подключить оба источника сразу — встречи соберутся на одной странице дня.</p></details>
+      <details><summary>Где хранятся мои данные? <span class="pm">+</span></summary><p>В твоих аккаунтах: твой Notion/Zoom, твой Vercel, твой Telegram. Мы не храним ни транскрипты, ни саммари — у нас просто нет базы.</p></details>
+      <details><summary>Что нужно для Zoom? <span class="pm">+</span></summary><p>Тариф Zoom Pro и выше с включёнными «Cloud recording» и «Audio transcription» (включить до созвонов). Локальные записи Zoom не видны — нужны облачные.</p></details>
+      <details><summary>А если созвон не записали? <span class="pm">+</span></summary><p>Чего нет в записи — того агент не увидит. Работает ровно с тем, что реально попало в Notion или в облако Zoom.</p></details>
+      <details><summary>Как происходит оплата? <span class="pm">+</span></summary><p>Криптой через бота. После подтверждения платежа бот сразу присылает ссылку на репозиторий и гайд. <span class="hl">Приём оплаты подключается — скоро.</span></p></details>
+    </div>
+  </div>
+</section>
+
+<!-- ── ФИНАЛ ── -->
+<section class="final line-top">
+  <div class="wrap">
+    <div class="sec-head rv">
+      <span class="kicker mono" style="display:block;margin-bottom:18px"><span class="hl">// go</span></span>
+      <h2>Хватит терять <span class="y">договорённости</span></h2>
+      <p class="lede">Поставь за 5 минут и пусть каждый вечер сводка приходит сама.</p>
+      <a href="#price" class="btn btn-primary" style="padding:15px 30px">Получить доступ — $5 <span class="arrow">→</span></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap foot-in">
+    <span>© 2026 call_summary · сделано на Claude</span>
+    <span class="log" id="footlog"><span class="ok">●</span> routine: idle · next run 21:00</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var io = new IntersectionObserver(function(es){
+    es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target);} });
+  },{threshold:.16});
+  document.querySelectorAll('.rv').forEach(function(el){ io.observe(el); });
+
+  var cmdEl=document.getElementById('cmd'), logEl=document.getElementById('log'),
+      outEl=document.getElementById('out'), curEl=document.getElementById('cur');
+  if(reduce){
+    cmdEl.textContent='call-summary pipeline --today';
+    outEl.classList.add('show');
+    document.querySelectorAll('#out .out-row').forEach(function(r){r.classList.add('in');});
+  } else {
+    var cmd='call-summary pipeline --today';
+    var logs=[
+      {t:300,h:'<span class="t-dim">→ источник: </span><span class="t-prompt">notion + zoom</span>'},
+      {t:650,h:'<span class="t-dim">→ найдено встреч за сегодня: </span>2'},
+      {t:600,h:'<span class="t-spk">[10:58] Миша:</span> <span class="t-dim">CRM актуализировать нужно, сделаешь?</span>'},
+      {t:520,h:'<span class="t-spk">[10:59] Максим:</span> <span class="t-dim">продажника подправлю, два сообщения в скрипте…</span>'},
+      {t:700,h:'<span class="t-prompt">✦ Claude</span> <span class="t-dim">summarizing transcript…</span>'}
+    ];
+    function type(str,i){ cmdEl.textContent=str.slice(0,i);
+      if(i<=str.length){ setTimeout(function(){type(str,i+1);},34);} else { setTimeout(runLogs,420);} }
+    function runLogs(){ var idx=0;(function next(){
+      if(idx>=logs.length){ setTimeout(revealOut,360); return; }
+      var l=logs[idx++],d=document.createElement('div'); d.className='t-line'; d.innerHTML=l.h;
+      logEl.appendChild(d); setTimeout(next,l.t); })(); }
+    function revealOut(){ curEl.style.display='none'; outEl.classList.add('show');
+      var rows=outEl.querySelectorAll('.out-row'),i=0;(function next(){
+        if(i>=rows.length){ setTimeout(reset,4200); return; }
+        rows[i++].classList.add('in'); setTimeout(next,260); })(); }
+    function reset(){ logEl.innerHTML=''; outEl.classList.remove('show');
+      outEl.querySelectorAll('.out-row').forEach(function(r){r.classList.remove('in');});
+      curEl.style.display='inline-block'; cmdEl.textContent='';
+      setTimeout(function(){type(cmd,0);},500); }
+    setTimeout(function(){type(cmd,0);},600);
+  }
+
+  var payBtn=document.getElementById('payBtn'), payStub=document.getElementById('payStub');
+  if(payBtn){ payBtn.addEventListener('click',function(){
+    payStub.innerHTML='<span class="hl">⌁</span> приём оплаты подключается — скоро тут будет crypto-инвойс'; });}
+
+  var fl=document.getElementById('footlog');
+  if(fl && !reduce){
+    var states=['routine: idle · next run 21:00','notion: connected','zoom: connected','vercel: ready','telegram: ready'];
+    var k=0; setInterval(function(){ k=(k+1)%states.length;
+      fl.innerHTML='<span class="ok">●</span> '+states[k]; },2600);
+  }
+})();
+</script>
+</body>
+</html>
