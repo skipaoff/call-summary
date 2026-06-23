@@ -9,8 +9,8 @@
   "userConfig": {
     "source": {
       "type": "string",
-      "title": "Источник записей: notion или zoom",
-      "description": "Откуда брать созвоны. Notion AI Meeting Notes или Zoom (облачные записи, нужен Zoom Pro+).",
+      "title": "Источник записей: notion, zoom или both",
+      "description": "Откуда брать созвоны. notion (Notion AI Meeting Notes), zoom (облачные записи, нужен Zoom Pro+) или both (оба сразу).",
       "required": true
     },
     "notion_page_url": {

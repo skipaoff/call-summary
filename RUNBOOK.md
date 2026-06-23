@@ -11,8 +11,8 @@
 ## Шаги
 
 ### 1. Конфиг
-Прочитать `config.json` → `source.type` (`notion` | `zoom`), `site.vercelProject`,
-`site.vercelScope`. Для notion — `source.notion.pageId/pageUrl`.
+Прочитать `config.json` → `source.type` (`notion` | `zoom` | `both`),
+`site.vercelProject`, `site.vercelScope`. Для notion — `source.notion.pageId/pageUrl`.
 
 ### 2. Достать встречи за сегодня (адаптер по `source.type`)
 Единственный шаг, зависящий от источника. Результат любой ветки — одинаковый внутренний
@@ -27,6 +27,9 @@
   recording + audio transcription).
 - Для каждой записи взять транскрипт (файл `audio_transcript`, VTT) → очистить от
   таймкодов в текст. Нет готового транскрипта — пропустить (заберётся позже).
+
+**both**: выполнить обе ветки и объединить встречи в один `meetings[]`, отсортировать
+по времени. Дубли НЕ склеиваем — показываем обе версии (у каждой свой `source`).
 
 > Новый источник = новая ветка только здесь. Дальше всё работает с единым форматом.
 
