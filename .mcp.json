@@ -3,6 +3,11 @@
     "notion": {
       "type": "http",
       "url": "https://mcp.notion.com/mcp"
+    },
+    "zoom-mcp": {
+      "type": "http",
+      "url": "https://mcp.zoom.us/mcp/zoom/streamable",
+      "headers": { "Authorization": "Bearer ${ZOOM_MCP_ACCESS_TOKEN}" }
     }
   }
 }

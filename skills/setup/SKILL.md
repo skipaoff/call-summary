@@ -18,7 +18,12 @@ description: Провести пользователя по настройке C
    установке (`notion_page_url`); если нет — вставь сейчас.
 
 **Zoom:**
-1. Подключи **Zoom** в директории коннекторов Claude (войди в свой Zoom).
+1. Подключи **Zoom** в директории коннекторов Claude (Settings → Connectors → Zoom) —
+   войди в свой Zoom, выдай доступ. Это покрывает записи и транскрипты (скоупы
+   `cloud_recording:read:*`, `meeting:read:assets`). Токен в этом случае не нужен.
+   - Альтернатива для Claude Code: hosted MCP `https://mcp.zoom.us/mcp/zoom/streamable`
+     с `ZOOM_MCP_ACCESS_TOKEN` (Bearer). ⚠️ Хост в офиц. источниках расходится
+     (`mcp.zoom.us` vs `mcp-us.zoom.us`) — если один не отвечает, попробуй второй.
 2. Условие: тариф **Zoom Pro+** с включёнными «Cloud recording» и «Audio transcription»
    (включить **до** созвонов — иначе транскрипт не создаётся).
 3. Локальные записи Zoom не видны — нужны именно **облачные**.
