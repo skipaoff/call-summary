@@ -2,20 +2,7 @@
 // уведомление владельцу. Статус перепроверяем у Crypto Pay (не доверяем телу вслепую).
 import { send } from "../lib/tg.js";
 import { getInvoice } from "../lib/cryptopay.js";
-
-const REPO = process.env.REPO_URL || "https://github.com/skipaoff/call-summary";
-const GUIDE = process.env.GUIDE_URL || (REPO + "/blob/main/GUIDE.md");
-
-function deliver(chatId) {
-  const text =
-    "✅ <b>Оплата получена. Спасибо!</b>\n\n" +
-    "Вот твой доступ к Call Summary:\n" +
-    `📦 Репозиторий: ${REPO}\n` +
-    `📖 Установка за 5 минут: ${GUIDE}\n\n` +
-    "Подключаешь Notion и/или Zoom, создаёшь рутину по гайду — и каждый вечер " +
-    "сводка приходит сама. Вопросы — пиши прямо сюда.";
-  return send(chatId, text, { disable_web_page_preview: false });
-}
+import { deliverAccess } from "../lib/deliver.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(200).send("ok");
@@ -28,7 +15,7 @@ export default async function handler(req, res) {
       if (inv && inv.status === "paid") {
         let meta = {};
         try { meta = JSON.parse(inv.payload || "{}"); } catch {}
-        if (meta.chat) await deliver(meta.chat);
+        if (meta.chat) await deliverAccess(meta.chat, "✅ <b>Оплата получена. Спасибо!</b>");
 
         const owner = process.env.OWNER_CHAT_ID;
         if (owner) {

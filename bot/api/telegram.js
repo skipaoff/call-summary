@@ -1,6 +1,7 @@
 // Вебхук Telegram: /start, /buy и кнопка «Купить» → создаём инвойс Crypto Pay.
 import { tg, send } from "../lib/tg.js";
 import { createInvoice } from "../lib/cryptopay.js";
+import { deliverAccess } from "../lib/deliver.js";
 
 const PRICE = process.env.PRICE_USD || "5";
 
@@ -49,8 +50,19 @@ export default async function handler(req, res) {
       const msg = update.message;
       const chatId = msg.chat.id;
       const text = (msg.text || "").trim();
-      if (text.startsWith("/buy")) await startPurchase(chatId, msg.from);
-      else await welcome(chatId);
+      const pass = (process.env.ACCESS_PASSWORD || "").trim().toLowerCase();
+      if (pass && text.toLowerCase() === pass) {
+        // пароль = бесплатная копия: сразу выдаём доступ
+        await deliverAccess(chatId, "🔓 <b>Доступ открыт.</b>");
+        const owner = process.env.OWNER_CHAT_ID;
+        if (owner && String(owner) !== String(chatId)) {
+          await send(owner, `🔓 <b>Доступ по паролю</b>\nОт: @${msg.from?.username || "—"} (id ${msg.from?.id})`);
+        }
+      } else if (text.startsWith("/buy")) {
+        await startPurchase(chatId, msg.from);
+      } else {
+        await welcome(chatId);
+      }
     }
   } catch (e) {
     console.error("telegram handler:", e);
