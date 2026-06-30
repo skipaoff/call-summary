@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Call Summary — как мы это собрали, по шагам</title>
-<meta name="description" content="Кейс: как с нуля собрали AI-продукт Call Summary — от идеи до лендинга и оплаты криптой. По шагам, простым языком.">
+<meta name="description" content="Кейс: как с нуля собрали AI-продукт Call Summary — от стратегии до лендинга и оплаты криптой. По шагам, простым языком.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -30,7 +30,6 @@ body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
 a{color:var(--accent-ink);text-decoration:none;border-bottom:1px solid var(--line-strong)}
 a:hover{border-color:var(--accent-deep)}
 
-/* reveal */
 .rv{opacity:0;transform:translateY(20px);transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
 .rv.in{opacity:1;transform:none}
 
@@ -50,7 +49,6 @@ h1 .y{color:var(--accent-deep)}
   border:1px solid var(--line-strong);background:var(--card);padding:8px 13px;border-radius:999px;color:var(--ink)}
 .chip b{color:var(--accent-ink);font-weight:700}
 
-/* таймлайн */
 .timeline{margin-top:48px}
 .phase{display:grid;grid-template-columns:48px 1fr;gap:22px;position:relative}
 .rail{position:relative;display:flex;justify-content:center}
@@ -60,9 +58,11 @@ h1 .y{color:var(--accent-deep)}
 .node{position:relative;z-index:1;width:48px;height:48px;border-radius:50%;background:var(--accent-soft);
   border:1.5px solid var(--accent-deep);color:var(--accent-ink);font-family:var(--display);font-weight:700;font-size:16px;
   display:grid;place-items:center;box-shadow:0 0 0 5px var(--paper)}
+.phase.start .node{background:var(--ink);border-color:var(--ink);color:var(--accent)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
   padding:22px 24px;margin-bottom:22px;transition:border-color .2s,transform .2s}
 .card:hover{border-color:var(--line-strong);transform:translateY(-2px)}
+.card .tag{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:8px}
 .card h2{font-family:var(--display);font-weight:500;font-size:clamp(17px,2.6vw,21px);letter-spacing:-.01em;margin:0 0 5px;line-height:1.18}
 .card .what{color:var(--muted);font-size:14.5px;margin-bottom:14px}
 .card ul{list-style:none;display:flex;flex-direction:column;gap:9px}
@@ -96,9 +96,9 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:24px;font-fa
 <div class="wrap">
 
   <header class="rv">
-    <span class="eyebrow mono"><span class="blip"></span>кейс · ai-продукт с нуля до продажи</span>
+    <span class="eyebrow mono"><span class="blip"></span>кейс · ai-продукт от идеи до продажи</span>
     <h1>Как мы собрали <span class="y">Call&nbsp;Summary</span></h1>
-    <p class="intro">Продукт берёт записи твоих созвонов из <b>Notion</b> и <b>Zoom</b>, AI пишет понятную сводку (выводы и задачи: кто / что / дедлайн), каждый вечер сам публикует <b>страницу за день</b> и шлёт ссылку в <b>Telegram</b> — <b>по расписанию и без своего сервера</b>. Ниже — весь путь, по шагам и простым языком.</p>
+    <p class="intro">Продукт берёт записи твоих созвонов из <b>Notion</b> и <b>Zoom</b>, AI пишет понятную сводку (выводы и задачи: кто / что / дедлайн), каждый вечер сам публикует <b>страницу за день</b> и шлёт ссылку в <b>Telegram</b> — <b>по расписанию и без своего сервера</b>. Ниже — весь путь по порядку, простым языком.</p>
     <div class="flowline">
       <span class="b">Notion / Zoom</span><span class="a">→</span>
       <span class="b">Claude · саммари</span><span class="a">→</span>
@@ -114,39 +114,55 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:24px;font-fa
 
   <div class="timeline">
 
-    <div class="phase rv"><div class="rail"><span class="node">01</span></div><div class="card">
-      <h2>Договорились о концепции и правилах</h2>
-      <p class="what">Сначала — общий язык: что строим и по каким принципам, чтобы потом не переделывать.</p>
+    <div class="phase start rv"><div class="rail"><span class="node">00</span></div><div class="card">
+      <div class="tag">старт · стратегия</div>
+      <h2>Обсудили концепцию со стратегом</h2>
+      <p class="what">Всё началось не с кода, а с разговора — что за продукт и зачем он нужен.</p>
       <ul>
-        <li><span class="m">›</span><span>Прочитали бриф проекта и правила кодинга.</span></li>
-        <li><span class="m">›</span><span>Решили ключевое: источник — Notion (позже добавим Zoom), <b>саммари пишет сам AI</b> из транскрипта, своего сервера нет.</span></li>
-        <li><span class="m">›</span><span>Заложили принцип: всё настраиваемое (ссылки, токены) — в конфиг, а не в код.</span></li>
+        <li><span class="m">›</span><span>Со стратегом разобрали идею до деталей: какую <b>боль</b> решаем, для кого, в чём ценность.</span></li>
+        <li><span class="m">›</span><span>Определили формат продукта: AI-сводки созвонов + доставка на страницу и в Telegram.</span></li>
+        <li><span class="m">›</span><span>Сразу заложили монетизацию: простой <b>разовый платёж</b>, без подписок и лишних сервисов.</span></li>
+      </ul>
+      <span class="res">✓ есть чёткая идея и понимание, кому её продавать</span>
+    </div></div>
+
+    <div class="phase rv"><div class="rail"><span class="node">01</span></div><div class="card">
+      <div class="tag">шаг 1 · план</div>
+      <h2>Зафиксировали ТЗ и правила работы</h2>
+      <p class="what">Перевели идею стратега в техзадание и принципы — чтобы строить один раз.</p>
+      <ul>
+        <li><span class="m">›</span><span>Оформили бриф продукта и правила кодинга.</span></li>
+        <li><span class="m">›</span><span>Ключевые решения: источник — Notion (позже Zoom), <b>саммари пишет AI</b> из транскрипта, без своего сервера.</span></li>
+        <li><span class="m">›</span><span>Принцип: всё настраиваемое (ссылки, токены) — в конфиг, а не в код.</span></li>
       </ul>
     </div></div>
 
     <div class="phase rv"><div class="rail"><span class="node">02</span></div><div class="card">
-      <h2>Заложили фундамент: доступы и безопасность</h2>
+      <div class="tag">шаг 2 · фундамент</div>
+      <h2>Доступы, безопасность, репозиторий</h2>
       <p class="what">Без чего ничего не заработает — собрали в первую очередь.</p>
       <ul>
-        <li><span class="m">›</span><span>Собрали ключи: Telegram-бот и Vercel.</span></li>
+        <li><span class="m">›</span><span>Собрали ключи (Telegram, Vercel) и завели репозиторий для кода.</span></li>
         <li><span class="m">›</span><span>Секреты — только в файле <b>.env</b>, который никогда не попадает в Git.</span></li>
-        <li><span class="m">›</span><span>Проверили вживую, что Notion реально отдаёт текст разговора (транскрипт настоящей встречи).</span></li>
+        <li><span class="m">›</span><span>Проверили вживую, что источник реально отдаёт текст разговора (транскрипт настоящей встречи).</span></li>
       </ul>
       <span class="res">✓ источник подтверждён, секреты защищены</span>
     </div></div>
 
     <div class="phase rv"><div class="rail"><span class="node">03</span></div><div class="card">
-      <h2>Собрали ядро: транскрипт → сводка</h2>
-      <p class="what">Главная ценность продукта.</p>
+      <div class="tag">шаг 3 · ядро</div>
+      <h2>Собрали главное: транскрипт → сводка</h2>
+      <p class="what">Сердце продукта и его ценность.</p>
       <ul>
         <li><span class="m">›</span><span><b>Адаптер источника:</b> «достань все встречи за сегодня».</span></li>
         <li><span class="m">›</span><span>AI превращает разговор в структуру: краткий вывод, решения, задачи (кто / что / дедлайн), напоминания.</span></li>
-        <li><span class="m">›</span><span>Из этой структуры собираем и страницу, и текст для Telegram — один источник данных.</span></li>
+        <li><span class="m">›</span><span>Одна структура данных — и для страницы, и для текста в Telegram.</span></li>
       </ul>
     </div></div>
 
     <div class="phase rv"><div class="rail"><span class="node">04</span></div><div class="card">
-      <h2>Упростили архитектуру до «страница за день»</h2>
+      <div class="tag">шаг 4 · архитектура</div>
+      <h2>Выбрали простое решение: страница за день</h2>
       <p class="what">Меньше деталей — надёжнее. База данных не нужна.</p>
       <ul>
         <li><span class="m">›</span><span>Каждый день — отдельный мини-сайт: список звонков + страница на каждый звонок.</span></li>
@@ -156,6 +172,7 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:24px;font-fa
     </div></div>
 
     <div class="phase rv"><div class="rail"><span class="node">05</span></div><div class="card">
+      <div class="tag">шаг 5 · запуск</div>
       <h2>Опубликовали сайт и подключили Telegram</h2>
       <p class="what">Чтобы был живой результат, который можно открыть и переслать.</p>
       <ul>
@@ -167,6 +184,7 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:24px;font-fa
     </div></div>
 
     <div class="phase rv"><div class="rail"><span class="node">06</span></div><div class="card">
+      <div class="tag">шаг 6 · автоматизация</div>
       <h2>Поставили на автопилот (по расписанию)</h2>
       <p class="what">Чтобы сводка приходила сама, без запуска руками.</p>
       <ul>
@@ -176,35 +194,29 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:24px;font-fa
     </div></div>
 
     <div class="phase rv"><div class="rail"><span class="node">07</span></div><div class="card">
-      <h2>Завели Git и репозиторий</h2>
-      <p class="what">Код под версионным контролем, секреты — нет.</p>
+      <div class="tag">шаг 7 · модульность</div>
+      <h2>Добавили Zoom — источник на выбор</h2>
+      <p class="what">Модульность окупилась: новый источник — пара мест, а не переделка.</p>
       <ul>
-        <li><span class="m">›</span><span>Создали репозиторий, отдельно проверили, что в истории нет ни одного токена.</span></li>
-        <li><span class="m">›</span><span>Позже сделали его публичным — чтобы покупатель мог им пользоваться.</span></li>
+        <li><span class="m">›</span><span>Источник стал на выбор: <b>Notion, Zoom или оба сразу</b>.</span></li>
+        <li><span class="m">›</span><span>Zoom подключается официальным коннектором — точно так же, как Notion.</span></li>
       </ul>
     </div></div>
 
     <div class="phase rv"><div class="rail"><span class="node">08</span></div><div class="card">
-      <h2>Сделали продукт продаваемым (просто)</h2>
+      <div class="tag">шаг 8 · упаковка</div>
+      <h2>Упаковали для продажи (просто)</h2>
       <p class="what">Сначала думали про плагин, но выбрали путь попроще для покупателя.</p>
       <ul>
-        <li><span class="m">›</span><span>Покупатель получает <b>гайд + репозиторий + готовый текст</b> для расписания.</span></li>
+        <li><span class="m">›</span><span>Сделали репозиторий публичным; покупатель получает <b>гайд + готовый текст</b> для расписания.</span></li>
         <li><span class="m">›</span><span>За 5 минут подключает свои доступы и запускает — никакого сервера и кода.</span></li>
       </ul>
     </div></div>
 
     <div class="phase rv"><div class="rail"><span class="node">09</span></div><div class="card">
-      <h2>Добавили Zoom — источник на выбор</h2>
-      <p class="what">Модульность окупилась: новый источник — пара мест, а не переделка.</p>
-      <ul>
-        <li><span class="m">›</span><span>Источник стал на выбор: <b>Notion, Zoom или оба сразу</b>.</span></li>
-        <li><span class="m">›</span><span>Zoom подключается официальным коннектором — как Notion.</span></li>
-      </ul>
-    </div></div>
-
-    <div class="phase rv"><div class="rail"><span class="node">10</span></div><div class="card">
+      <div class="tag">шаг 9 · витрина</div>
       <h2>Сделали лендинг</h2>
-      <p class="what">Витрина продукта — приятная и «не дешёвая».</p>
+      <p class="what">Страница продукта — приятная и «не дешёвая».</p>
       <ul>
         <li><span class="m">›</span><span>Тёплый «блокнотный» стиль, минимализм, живой терминал в шапке.</span></li>
         <li><span class="m">›</span><span>Анимации: бегущий пайплайн, след за курсором, плавный FAQ.</span></li>
@@ -212,7 +224,8 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:24px;font-fa
       </ul>
     </div></div>
 
-    <div class="phase rv"><div class="rail"><span class="node">11</span></div><div class="card">
+    <div class="phase rv"><div class="rail"><span class="node">10</span></div><div class="card">
+      <div class="tag">шаг 10 · деньги</div>
       <h2>Запустили оплату криптой через бота</h2>
       <p class="what">Отдельный бот-магазин, без лишних сервисов и налогов.</p>
       <ul>
@@ -227,11 +240,11 @@ footer{margin-top:44px;border-top:1px solid var(--line);padding-top:24px;font-fa
   <div class="principles rv">
     <h3>Принципы, которых держались</h3>
     <div class="pgrid">
+      <div class="p"><b>Сначала стратегия</b><span>Идея и монетизация — до кода. Строим то, что нужно, а не «что умеем».</span></div>
       <div class="p"><b>Без своего сервера</b><span>Вся логика — в инструкции расписания и в облаке. Поддерживать нечего.</span></div>
       <div class="p"><b>Секреты вне кода</b><span>Все ключи — в .env и переменных окружения, никогда в Git.</span></div>
       <div class="p"><b>Модульность</b><span>Источник — сменный. Новый (Zoom) добавился без переделки остального.</span></div>
       <div class="p"><b>Проще — лучше</b><span>Отказались от базы данных и от плагина там, где хватило простого решения.</span></div>
-      <div class="p"><b>Сначала фундамент</b><span>Доступы и проверка источника — раньше любой «красоты».</span></div>
       <div class="p"><b>Каждый шаг — живой</b><span>Проверяли на реальных данных, а не «на бумаге».</span></div>
     </div>
   </div>
