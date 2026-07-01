@@ -7,6 +7,9 @@
     },
     "zoom": {
       "userId": "me"
+    },
+    "telegram": {
+      "note": "эконом-режим: транскрипты пересылаются боту (TELEGRAM_BOT_TOKEN), читаются через getUpdates"
     }
   },
   "site": {
