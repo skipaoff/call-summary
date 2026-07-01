@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Call Summary — созвоны превращаются в сводку за день</title>
-<meta name="description" content="AI читает транскрипты твоих созвонов из Notion и Zoom, пишет кастомное саммари и каждый вечер публикует страницу дня + шлёт ссылку в Telegram. Без сервера.">
+<meta name="description" content="AI читает транскрипты твоих созвонов из Notion, Zoom — или прямо из Telegram (без подписок), пишет кастомное саммари и каждый вечер публикует страницу дня + шлёт ссылку в Telegram. Без сервера.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;600;700;800&family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -281,7 +281,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
         <a href="#how" class="btn btn-ghost">Как это работает</a>
       </div>
       <div class="hero-meta">
-        <span><b>2</b> источника · notion / zoom</span>
+        <span><b>3</b> способа ввода · notion / zoom / telegram</span>
         <span><b>0</b> серверов</span>
         <span><b>5</b> минут на установку</span>
       </div>
@@ -339,6 +339,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
         <div class="lbl">источник</div>
         <div class="node"><span class="ic">N</span> Notion</div>
         <div class="node"><span class="ic">Z</span> Zoom</div>
+        <div class="node"><span class="ic">✈</span> Telegram</div>
       </div>
       <div class="conn"><span class="pkt"></span></div>
       <div class="stage brain">
@@ -355,7 +356,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
     </div>
 
     <div class="steps rv">
-      <div class="step"><div class="sn">01</div><h4>Подключаешь источник</h4><p>Notion, Zoom или оба сразу — своими коннекторами в Claude.</p></div>
+      <div class="step"><div class="sn">01</div><h4>Подключаешь источник</h4><p>Notion, Zoom, оба — или без подписок: пересылай транскрипты боту в Telegram.</p></div>
       <div class="step"><div class="sn">02</div><h4>Claude читает день</h4><p>Берёт транскрипты всех сегодняшних звонков.</p></div>
       <div class="step"><div class="sn">03</div><h4>Пишет саммари</h4><p>Выводы, задачи кто/что/дедлайн, напоминания — твоё, не платформенное.</p></div>
       <div class="step"><div class="sn">04</div><h4>Публикует страницу</h4><p>Мини-сайт за день на Vercel: индекс звонков + подстраница на каждый.</p></div>
@@ -403,7 +404,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
       <h2>Собрано как <span class="y">инструмент</span>, а не игрушка</h2>
     </div>
     <div class="feat-grid rv">
-      <div class="feat card"><div class="fi">[src]</div><h4>Сменный источник</h4><p>Notion AI Meeting Notes, Zoom-облако или оба. Новый источник — пара мест в коде.</p></div>
+      <div class="feat card"><div class="fi">[src]</div><h4>Три способа ввода</h4><p>Notion, Zoom — или <b>вообще без подписок</b>: пересылай транскрипты боту в Telegram. Можно комбинировать.</p></div>
       <div class="feat card"><div class="fi">[ai]</div><h4>Кастомное саммари</h4><p>Claude пишет из транскрипта по твоему формату. Не общая выжимка платформы.</p></div>
       <div class="feat card"><div class="fi">[web]</div><h4>Мини-сайт за день</h4><p>Индекс звонков + подстраница на каждый, в твоём стиле. Чистая статика.</p></div>
       <div class="feat card"><div class="fi">[∞]</div><h4>Вечный архив</h4><p>Каждый день — постоянный публичный URL. Ничего не теряется, БД не нужна.</p></div>
@@ -428,7 +429,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
         <div class="price-note">разовый платёж · крипта</div>
         <ul class="incl">
           <li><span class="ok">✓</span> Репозиторий-плагин со всем пайплайном</li>
-          <li><span class="ok">✓</span> Гайд установки за 5 минут (Notion / Zoom / оба)</li>
+          <li><span class="ok">✓</span> Гайд установки за 5 минут (Notion / Zoom / Telegram)</li>
           <li><span class="ok">✓</span> Готовый промпт рутины — копипаст и поехали</li>
           <li><span class="ok">✓</span> Обновления и новые источники</li>
           <li><span class="ok">✓</span> Данные остаются у тебя — мы ничего не храним</li>
@@ -439,7 +440,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
       <div class="price-side">
         <div class="side-card card">
           <div class="sh">// требования</div>
-          <p>Аккаунт Claude. Источник: Notion AI Meeting Notes или Zoom <b class="hl">Pro+</b> с облачной записью и транскрипцией. Свой Vercel и Telegram-бот (бесплатно).</p>
+          <p>Аккаунт Claude. Источник на выбор: Notion, Zoom <b class="hl">Pro+</b> — <b>или вообще без подписок</b>: пересылай транскрипты боту в Telegram. Свой Vercel и Telegram-бот (бесплатно).</p>
         </div>
         <div class="side-card card">
           <div class="sh">// почему так дёшево</div>
@@ -459,7 +460,7 @@ footer{border-top:1px solid var(--line);padding:34px 0;font-family:var(--mono);f
     </div>
     <div class="rv">
       <details open><summary>Нужен ли свой сервер или хостинг? <span class="pm">+</span></summary><p>Нет. Пайплайн запускается в облаке Claude по расписанию (Routines). Сайт — статика на Vercel. Поддерживать нечего.</p></details>
-      <details><summary>Откуда берутся записи? <span class="pm">+</span></summary><p>Из Notion AI Meeting Notes и/или Zoom (облачные записи с транскрипцией). Можно подключить оба источника сразу — встречи соберутся на одной странице дня.</p></details>
+      <details><summary>Откуда берутся записи? <span class="pm">+</span></summary><p>Три способа: из <b>Notion</b> AI Meeting Notes, из <b>Zoom</b> (облачные записи с транскрипцией) — или <b>совсем без подписок</b>: пересылаешь транскрипты боту в <b>Telegram</b>, и вечером он соберёт из них сводку. Источники можно комбинировать.</p></details>
       <details><summary>Где хранятся мои данные? <span class="pm">+</span></summary><p>В твоих аккаунтах: твой Notion/Zoom, твой Vercel, твой Telegram. Мы не храним ни транскрипты, ни саммари — у нас просто нет базы.</p></details>
       <details><summary>Что нужно для Zoom? <span class="pm">+</span></summary><p>Тариф Zoom Pro и выше с включёнными «Cloud recording» и «Audio transcription» (включить до созвонов). Локальные записи Zoom не видны — нужны облачные.</p></details>
       <details><summary>А если созвон не записали? <span class="pm">+</span></summary><p>Чего нет в записи — того агент не увидит. Работает ровно с тем, что реально попало в Notion или в облако Zoom.</p></details>
